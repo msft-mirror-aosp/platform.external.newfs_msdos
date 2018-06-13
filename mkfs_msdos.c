@@ -31,10 +31,18 @@ static const char rcsid[] =
 #endif /* not lint */
 
 #include <sys/param.h>
+#if defined(__linux__)
+#include <linux/fs.h>
+#include <linux/hdreg.h>
+#include <sys/ioctl.h>
+#elif defined(__APPLE__)
+/* Nothing. */
+#else
 #include <sys/fdcio.h>
 #include <sys/disk.h>
 #include <sys/disklabel.h>
 #include <sys/mount.h>
+#endif
 #include <sys/stat.h>
 #include <sys/time.h>
 
@@ -52,6 +60,13 @@ static const char rcsid[] =
 #include <unistd.h>
 
 #include "mkfs_msdos.h"
+
+#if !defined(__packed)
+#define __packed __attribute__((__packed__))
+#endif
+#if !defined(__unused)
+#define __unused __attribute__((__unused__))
+#endif
 
 #define	MAXU16	  0xffff	/* maximum unsigned 16-bit quantity */
 #define	BPN	  4		/* bits per nibble */
@@ -766,6 +781,7 @@ done:
 static int
 check_mounted(const char *fname, mode_t mode)
 {
+#if 0
     struct statfs *mp;
     const char *s1, *s2;
     size_t len;
@@ -790,6 +806,7 @@ check_mounted(const char *fname, mode_t mode)
 	    return -1;
 	}
     }
+#endif
     return 0;
 }
 
@@ -814,6 +831,59 @@ getstdfmt(const char *fmt, struct bpb *bpb)
 /*
  * Get disk slice, partition, and geometry information.
  */
+#if defined(__linux__)
+static int getdiskinfo(int fd, const char *fname, const char *dtype,
+                       __unused int oflag, struct bpb *bpb)
+{
+    if (ioctl(fd, BLKSSZGET, &bpb->bpbBytesPerSec)) {
+        err(1, "ioctl(BLKSSZGET) for bytes/sector failed");
+    }
+
+    if (ckgeom(fname, bpb->bpbBytesPerSec, "bytes/sector") == -1) return -1;
+
+    u_long block_size;
+    if (ioctl(fd, BLKGETSIZE, &block_size)) {
+        err(1, "ioctl(BLKGETSIZE) failed");
+    }
+
+    if (block_size > UINT32_MAX) {
+        errx(1, "block size too large: %lu", block_size);
+    }
+
+    bpb->bpbHugeSectors = (u_int)block_size;
+
+    struct hd_geometry geom;
+    if (ioctl(fd, HDIO_GETGEO, &geom)) {
+        warn("ioctl(HDIO_GETGEO) failed, but will use sane values");
+        geom.heads = 64;
+        geom.sectors = 63;
+    }
+
+    if (!geom.heads) {
+        warnx("Bogus heads from kernel - setting sane value");
+        geom.heads = 64;
+    }
+
+    if (!geom.sectors) {
+        warnx("Bogus sectors from kernel - setting sane value");
+        geom.sectors = 63;
+    }
+
+    bpb->bpbSecPerTrack = geom.sectors;
+    if (ckgeom(fname, bpb->bpbSecPerTrack, "sectors/track") == -1) return -1;
+
+    bpb->bpbHeads = geom.heads;
+    if (ckgeom(fname, bpb->bpbHeads, "drive heads") == -1) return -1;
+
+    return 0;
+}
+#elif defined(__APPLE__)
+static int
+getdiskinfo(int fd, const char *fname, const char *dtype, __unused int oflag,
+	    struct bpb *bpb) {
+    return 0;
+}
+#else
 static int
 getdiskinfo(int fd, const char *fname, const char *dtype, __unused int oflag,
 	    struct bpb *bpb)
@@ -903,6 +973,7 @@ getdiskinfo(int fd, const char *fname, const char *dtype, __unused int oflag,
 	bpb->bpbHiddenSecs = hs;
     return 0;
 }
+#endif
 
 /*
  * Print out BPB values.
