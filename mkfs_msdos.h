@@ -1,4 +1,4 @@
-/*	$FreeBSD: head/sbin/newfs_msdos/mkfs_msdos.h 318355 2017-05-16 17:04:50Z emaste $	*/
+/*	$FreeBSD: head/sbin/newfs_msdos/mkfs_msdos.h 335189 2018-06-15 06:03:40Z delphij $	*/
 /*	$NetBSD: mkfs_msdos.h,v 1.3 2015/10/16 17:38:17 christos Exp $	*/
 
 /*-
@@ -34,6 +34,7 @@
 #include <stdbool.h>
 #define ALLOPTS \
 AOPT('@', off_t, offset, 0, "Offset in device") \
+AOPT('A', bool, align, -2, "Attempt to cluster align root directory") \
 AOPT('B', const char *, bootstrap, -1, "Bootstrap file") \
 AOPT('C', off_t, create_size, 0, "Create file") \
 AOPT('F', uint8_t,  fat_type, 12, "FAT type (12, 16, or 32)") \
@@ -61,7 +62,7 @@ AOPT('u', uint16_t, sectors_per_track, 1, "Sectors per track")
 struct msdos_options {
 #define AOPT(_opt, _type, _name, _min, _desc) _type _name;
 ALLOPTS
-#undef AOPT	
+#undef AOPT
 	uint32_t timestamp_set:1;
 	uint32_t volume_id_set:1;
 	uint32_t media_descriptor_set:1;
