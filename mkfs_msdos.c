@@ -852,27 +852,10 @@ static int getdiskinfo(int fd, const char *fname, const char *dtype,
 
     bpb->bpbHugeSectors = (u_int)block_size;
 
-    struct hd_geometry geom;
-    if (ioctl(fd, HDIO_GETGEO, &geom)) {
-        warn("ioctl(HDIO_GETGEO) failed, but will use sane values");
-        geom.heads = 64;
-        geom.sectors = 63;
-    }
-
-    if (!geom.heads) {
-        warnx("Bogus heads from kernel - setting sane value");
-        geom.heads = 64;
-    }
-
-    if (!geom.sectors) {
-        warnx("Bogus sectors from kernel - setting sane value");
-        geom.sectors = 63;
-    }
-
-    bpb->bpbSecPerTrack = geom.sectors;
+    bpb->bpbSecPerTrack = 63;
     if (ckgeom(fname, bpb->bpbSecPerTrack, "sectors/track") == -1) return -1;
 
-    bpb->bpbHeads = geom.heads;
+    bpb->bpbHeads = 64;
     if (ckgeom(fname, bpb->bpbHeads, "drive heads") == -1) return -1;
 
     return 0;
