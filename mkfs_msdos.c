@@ -847,16 +847,17 @@ static int getdiskinfo(int fd, const char *fname, const char *dtype,
 
     if (ckgeom(fname, bpb->bpbBytesPerSec, "bytes/sector") == -1) return -1;
 
-    u_long block_size;
-    if (ioctl(fd, BLKGETSIZE, &block_size)) {
-        err(1, "ioctl(BLKGETSIZE) failed");
+    u_long device_size;
+    if (ioctl(fd, BLKGETSIZE64, &device_size)) {
+        err(1, "ioctl(BLKGETSIZE64) failed");
     }
 
-    if (block_size > UINT32_MAX) {
-        errx(1, "block size too large: %lu", block_size);
+    u_long sectors = device_size/bpb->bpbBytesPerSec;
+    if (sectors > UINT32_MAX) {
+        errx(1, "too many sectors: %lu (%lu byte device, %u bytes/sector)",
+             sectors, device_size, bpb->bpbBytesPerSec);
     }
-
-    bpb->bpbHugeSectors = (u_int)block_size;
+    bpb->bpbHugeSectors = sectors;
 
     bpb->bpbSecPerTrack = 63;
     if (ckgeom(fname, bpb->bpbSecPerTrack, "sectors/track") == -1) return -1;
