@@ -14,12 +14,6 @@
 // This is used as the size of the write buffer of sectors.
 #define MAXPHYS (1024 * 1024)
 
-//#define static_assert _Static_assert
-
-// TODO: do we actually want this, or should we live without?
-#define SIGINFO SIGUSR2
-
-
 // On glibc, these headers use `__unused` as an identifier, so drag them in
 // first.
 #include <sys/stat.h>
