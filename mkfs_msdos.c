@@ -653,11 +653,6 @@ mkfs_msdos(const char *fname, const char *dtype, const struct msdos_options *op)
 	}
 #endif
 
-#if defined(__linux__)
-	if (ioctl(fd, BLKBSZSET, &bpb.bpbBytesPerSec))
-		printf("BLKBSZSET to %u failed\n", bpb.bpbBytesPerSec);
-#endif
-
 	for (lsn = 0; lsn < dir + (fat == 32 ? bpb.bpbSecPerClust : rds); lsn++) {
 	    if (got_siginfo) {
 		    fprintf(stderr,"%s: writing sector %u of %u (%u%%)\n",
