@@ -1,3 +1,20 @@
+package {
+    default_applicable_licenses: ["external_newfs_msdos_license"],
+}
+
+// Added automatically by a large-scale-change
+// See: http://go/android-license-faq
+license {
+    name: "external_newfs_msdos_license",
+    visibility: [":__subpackages__"],
+    license_kinds: [
+        "SPDX-license-identifier-BSD",
+    ],
+    license_text: [
+        "LICENSE",
+    ],
+}
+
 cc_binary {
     name: "newfs_msdos",
     c_std: "gnu11",
