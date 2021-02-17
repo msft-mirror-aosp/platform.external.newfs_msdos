@@ -936,14 +936,14 @@ static int getdiskinfo(int fd, const char *fname, const char *dtype,
 
     if (ckgeom(fname, bpb->bpbBytesPerSec, "bytes/sector") == -1) return -1;
 
-    u_long device_size;
+    u_int64_t device_size;
     if (ioctl(fd, BLKGETSIZE64, &device_size)) {
         err(1, "ioctl(BLKGETSIZE64) failed");
     }
 
-    u_long sectors = device_size/bpb->bpbBytesPerSec;
-    if (sectors > UINT32_MAX) {
-        errx(1, "too many sectors: %lu (%lu byte device, %u bytes/sector)",
+    u_int64_t sectors = device_size/bpb->bpbBytesPerSec;
+    if (sectors > UINT_MAX) {
+        errx(1, "too many sectors: %"PRIu64" (%"PRIu64" byte device, %u bytes/sector)",
              sectors, device_size, bpb->bpbBytesPerSec);
     }
     bpb->bpbHugeSectors = sectors;
