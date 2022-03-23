@@ -20,17 +20,17 @@
 #if __has_include(<sys/sysctl.h>)
 #include <sys/sysctl.h>
 #endif
-// Bionic, like the BSDs, has __unused. glibc and musl don't.
-#if defined(__GLIBC__) || defined(ANDROID_HOST_MUSL)
+// Bionic, like the BSDs, has __unused. glibc doesn't.
+#if defined(__GLIBC__)
 #define __unused __attribute__((__unused__))
 #endif
-// Neither macOS, glibc nor musl has __packed.
-#if defined(__APPLE__) || defined(__GLIBC__) || defined(ANDROID_HOST_MUSL)
+// Neither macOS nor glibc has __packed.
+#if defined(__APPLE__) || defined(__GLIBC__)
 #define __packed __attribute__((__packed__))
 #endif
 
-// The BSDs (including Android and macOS) have getprogname(), but glibc and musl don't.
-#if defined(__GLIBC__) || defined(ANDROID_HOST_MUSL)
+// The BSDs (including Android and macOS) have getprogname(), but glibc doesn't.
+#if defined(__GLIBC__)
 #include <errno.h>
 static inline char* getprogname() { return program_invocation_short_name; }
 #endif
