@@ -1,4 +1,4 @@
-/*	$FreeBSD$	*/
+/*	$FreeBSD: head/sbin/newfs_msdos/mkfs_msdos.h 335189 2018-06-15 06:03:40Z delphij $	*/
 /*	$NetBSD: mkfs_msdos.h,v 1.3 2015/10/16 17:38:17 christos Exp $	*/
 
 /*-
@@ -32,6 +32,7 @@
 
 #include <sys/types.h>
 #include <stdbool.h>
+#include <stdint.h>
 #define ALLOPTS \
 AOPT('@', off_t, offset, 0, "Offset in device") \
 AOPT('A', bool, align, -2, "Attempt to cluster align root directory") \
@@ -70,3 +71,7 @@ ALLOPTS
 };
 
 int mkfs_msdos(const char *, const char *, const struct msdos_options *);
+
+#if defined(__GLIBC__)
+static inline char* getprogname() { return program_invocation_short_name; }
+#endif
