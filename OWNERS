@@ -1,3 +1,4 @@
 enh@google.com
 delphij@google.com
 jsharkey@android.com
+include platform/system/core:/janitors/OWNERS #{LAST_RESORT_SUGGESTION}
